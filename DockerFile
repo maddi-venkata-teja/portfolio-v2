@@ -1,0 +1,15 @@
+# Use the official stable lightweight Nginx alpine image
+FROM nginx:alpine
+
+# Remove default static nginx landing assets
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy your local static index portfolio code and asset directories into the container
+COPY index.html /usr/share/nginx/html/index.html
+COPY assets/ /usr/share/nginx/html/assets/
+
+# Expose port 80 to match Cloud Run default container targeting
+EXPOSE 80
+
+# Run nginx in the foreground
+CMD ["nginx", "-g", "daemon off;"]

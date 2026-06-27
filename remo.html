@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Maddi Venkata Teja | Premium Full-Stack AI Portfolio</title>
+  <meta name="description" content="3D Neural Matrix Interface - Absolute No-Scroll Layout with Top Navigation" />
+
+  <!-- Premium Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Core Animation & Render Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #030306;
+      --bg-panel: rgba(10, 11, 18, 0.7);
+      --primary: #00f2ff;
+      --secondary: #ff0055;
+      --accent-purple: #9b51e0;
+      --neon-blue: #00d2ff;
+      --text-main: #ffffff;
+      --text-muted: #8e9bb0;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+      --glass-border: 1px solid rgba(0, 242, 255, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    /* ABSOLUTE NO-SCROLL LAYOUT REQUIREMENT */
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden !important;
+      background-color: var(--bg-dark);
+      font-family: var(--font-body);
+      color: var(--text-main);
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* APP VIEWPORT HUD LAYER */
+    .app-hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem;
+    }
+
+    .interactive-element {
+      pointer-events: auto;
+    }
+
+    /* NAVIGATION SYSTEM ARCHITECTURE */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      background: rgba(10, 11, 18, 0.8);
+      padding: 0.75rem 1.5rem;
+      border-radius: 14px;
+      border: var(--glass-border);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+
+    .branding h1 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, var(--primary), #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .branding span {
+      font-family: var(--font-code);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    nav {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+    }
+
+    .nav-btn:hover {
+      color: var(--primary);
+      background: rgba(0, 242, 255, 0.05);
+    }
+
+    .nav-btn.active {
+      color: #000;
+      background: var(--primary);
+      box-shadow: 0 0 15px var(--primary);
+      border-color: var(--primary);
+    }
+
+    .nav-btn.experience-nav-btn.active {
+      background: var(--accent-purple);
+      box-shadow: 0 0 15px var(--accent-purple);
+      border-color: var(--accent-purple);
+    }
+
+    /* INTERACTIVE MAIN WORKSPACE PANELS */
+    .main-workspace {
+      flex: 1;
+      width: 100%;
+      margin: 1rem 0;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* GLASSMORPHIC PANEL MODULES */
+    .view-panel {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      padding: 0 1.5rem;
+    }
+
+    .view-panel.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* COLUMNS FOR PANEL INTERFACES */
+    .side-column {
+      width: 350px;
+      height: 72vh;
+      background: var(--bg-panel);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      border: var(--glass-border);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .panel-title {
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+      color: var(--primary);
+      border-bottom: 1px solid rgba(0, 242, 255, 0.2);
+      padding-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .node-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .node-list::-webkit-scrollbar { width: 4px; }
+    .node-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    .node-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
+
+    .node-item {
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      cursor: pointer;
+    }
+
+    .node-item:hover, .node-item.active {
+      background: rgba(0, 242, 255, 0.08);
+      border-color: var(--primary);
+      box-shadow: 0 0 12px rgba(0, 242, 255, 0.15);
+      transform: translateX(4px);
+    }
+
+    .node-item.cert-item:hover, .node-item.cert-item.active {
+      background: rgba(255, 0, 85, 0.08);
+      border-color: var(--secondary);
+      box-shadow: 0 0 12px rgba(255, 0, 85, 0.15);
+      transform: translateX(-4px);
+    }
+
+    .node-item h3 { font-size: 0.85rem; font-weight: 600; color: #fff; }
+    .node-item p { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* TIMELINE FRAMEWORK STYLING */
+    .timeline-container {
+      width: 600px;
+      height: 72vh;
+      background: var(--bg-panel);
+      backdrop-filter: blur(24px);
+      border-radius: 20px;
+      border: 1px solid rgba(155, 81, 224, 0.2);
+      padding: 1.5rem 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      margin: auto;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .timeline-container::-webkit-scrollbar { width: 4px; }
+    .timeline-container::-webkit-scrollbar-thumb { background: rgba(155, 81, 224, 0.4); border-radius: 2px; }
+
+    .timeline-track {
+      position: absolute;
+      left: 2.5rem;
+      top: 4.5rem;
+      bottom: 2rem;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent-purple), rgba(155, 81, 224, 0.05));
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 3.5rem;
+      margin-bottom: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: 2.15rem;
+      top: 0.25rem;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--bg-dark);
+      border: 3px solid var(--accent-purple);
+      box-shadow: 0 0 10px var(--accent-purple);
+      transition: all 0.3s ease;
+      z-index: 5;
+    }
+
+    .timeline-item:hover .timeline-dot, .timeline-item.active .timeline-dot {
+      background: var(--accent-purple);
+      transform: scale(1.3);
+      box-shadow: 0 0 18px var(--accent-purple);
+    }
+
+    .timeline-content {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .timeline-item:hover .timeline-content, .timeline-item.active .timeline-content {
+      background: rgba(155, 81, 224, 0.06);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 15px rgba(155, 81, 224, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .timeline-time {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--accent-purple);
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .timeline-role { font-family: var(--font-heading); font-size: 1.05rem; color: #fff; }
+    .timeline-company { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+    .timeline-desc { font-size: 0.8rem; color: #b4bfd0; line-height: 1.4; }
+
+    /* SINGLE LAYER BOX WRAPPER FOR FULL PAGES */
+    .full-center-card {
+      width: 650px;
+      max-height: 74vh;
+      background: var(--bg-panel);
+      backdrop-filter: blur(24px);
+      border-radius: 20px;
+      border: var(--glass-border);
+      padding: 1.5rem 2.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      text-align: center;
+      margin: auto;
+      overflow-y: auto;
+    }
+    .full-center-card::-webkit-scrollbar { width: 4px; }
+    .full-center-card::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); border-radius: 2px; }
+
+    /* AVATAR PHOTO/ICON LAYOUT */
+    .profile-avatar-container {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 0.75rem auto;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 242, 255, 0.05);
+    }
+    .profile-avatar-container i {
+      font-size: 2.2rem;
+      color: var(--primary);
+      text-shadow: 0 0 10px var(--primary);
+    }
+
+    /* SOCIAL PROFILE NETWORK BUTTONS */
+    .network-container {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 1rem 0 1.25rem 0;
+      flex-wrap: wrap;
+    }
+    .network-chip {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      text-decoration: none;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+    }
+    .network-chip.git-chip { border: 1px solid rgba(255,255,255,0.15); color: #fff; }
+    .network-chip.git-chip:hover { background: rgba(255,255,255,0.1); border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,0.2); }
+    
+    .network-chip.leet-chip { border: 1px solid rgba(255, 161, 22, 0.3); color: #ffa116; }
+    .network-chip.leet-chip:hover { background: rgba(255, 161, 22, 0.1); border-color: #ffa116; box-shadow: 0 0 12px rgba(255, 161, 22, 0.3); }
+
+    .network-chip.link-chip { border: 1px solid rgba(10, 102, 194, 0.3); color: #0a66c2; }
+    .network-chip.link-chip:hover { background: rgba(10, 102, 194, 0.1); border-color: #0a66c2; box-shadow: 0 0 12px rgba(10, 102, 194, 0.3); }
+
+    /* CORE ACTION GRID LAYOUT */
+    .home-actions-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+    }
+
+    /* CENTER INSPECT OVERLAY */
+    .inspect-hub {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      width: 450px;
+      background: rgba(6, 8, 15, 0.95);
+      backdrop-filter: blur(24px);
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 40px rgba(0, 242, 255, 0.3);
+      border-radius: 20px;
+      padding: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 200;
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .inspect-hub.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    .inspect-tag { font-family: var(--font-code); font-size: 0.65rem; background: rgba(0, 242, 255, 0.1); color: var(--primary); padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 0.75rem; }
+    .inspect-title { font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 0.5rem; color: #fff; }
+    .inspect-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.5rem; text-align: left; }
+
+    .action-row { display: flex; gap: 1rem; }
+    .action-btn { flex: 1; padding: 0.75rem; border-radius: 10px; text-decoration: none; font-family: var(--font-heading); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: center; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none;}
+    .action-btn.primary-btn { background: linear-gradient(135deg, var(--primary), #00a2ff); color: #000; }
+    .action-btn.primary-btn:hover { box-shadow: 0 0 15px var(--primary); transform: translateY(-2px); }
+    .action-btn.secondary-btn { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.15); }
+    .action-btn.secondary-btn:hover { background: rgba(255,255,255,0.05); border-color: #fff; transform: translateY(-2px); }
+    .action-btn.resume-btn { background: linear-gradient(135deg, #9b51e0, var(--secondary)); color: #fff; }
+    .action-btn.resume-btn:hover { box-shadow: 0 0 15px var(--secondary); transform: translateY(-2px); }
+    .close-btn { position: absolute; top: 1rem; right: 1rem; color: var(--text-muted); background: transparent; border: none; font-size: 1.1rem; cursor: pointer; }
+    .close-btn:hover { color: #fff; }
+
+    /* CONTENT STYLING SPECIFICS */
+    .hero-title { font-family: var(--font-heading); font-size: 2rem; margin-bottom: 0.25rem; }
+    .hero-subtitle { font-family: var(--font-code); color: var(--primary); font-size: 0.85rem; margin-bottom: 0.75rem; }
+    .hero-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.25rem; }
+    
+    .grid-stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 1rem; }
+    .stack-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px; font-family: var(--font-code); font-size: 0.8rem; color: #fff; }
+
+    /* FORM STYLES */
+    .form-group { margin-bottom: 0.85rem; text-align: left; }
+    .form-group label { display: block; font-size: 0.7rem; font-family: var(--font-code); color: var(--primary); margin-bottom: 4px; text-transform: uppercase; }
+    .form-control { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(0, 242, 255, 0.2); padding: 0.65rem; border-radius: 8px; color: #fff; font-family: var(--font-body); font-size: 0.85rem; }
+    .form-control:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+    
+    /* RATING SYSTEM */
+    .rating-container { display: flex; gap: 0.5rem; margin-top: 4px; }
+    .star-btn { background: transparent; border: none; color: rgba(255,255,255,0.2); font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
+    .star-btn.selected { color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
+
+    /* NATIVE FLOATING MATRIX CHATBOT */
+    .chatbot-trigger {
+      position: absolute; bottom: 3.5rem; right: 1.5rem; width: 55px; height: 55px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #0066ff); border: 1px solid rgba(255,255,255,0.2);
+      color: #000; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+      cursor: pointer; z-index: 999; pointer-events: auto; box-shadow: 0 0 20px var(--primary); transition: transform 0.3s;
+    }
+    .chatbot-trigger:hover { transform: scale(1.1); }
+    
+    .chatbot-window {
+      position: absolute; bottom: 7.5rem; right: 1.5rem; width: 330px; height: 420px;
+      background: rgba(8, 10, 18, 0.95); backdrop-filter: blur(20px); border: var(--glass-border);
+      border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.7); display: none; flex-direction: column;
+      z-index: 1000; pointer-events: auto; overflow: hidden;
+    }
+    .chatbot-window.active { display: flex; }
+    .chat-header { background: rgba(0, 242, 255, 0.1); padding: 0.75rem 1rem; border-bottom: var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
+    .chat-header h4 { font-family: var(--font-heading); font-size: 0.85rem; color: var(--primary); letter-spacing: 1px; }
+    .chat-body { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.8rem; }
+    .chat-msg { max-width: 85%; padding: 0.6rem 0.8rem; border-radius: 10px; line-height: 1.4; font-family: var(--font-body); }
+    .chat-msg.bot { background: rgba(255,255,255,0.05); color: #fff; align-self: flex-start; border-left: 2px solid var(--primary); }
+    .chat-msg.user { background: var(--primary); color: #000; align-self: flex-end; font-weight: 500; }
+    .chat-footer { padding: 0.5rem; display: flex; gap: 0.5rem; border-top: rgba(255,255,255,0.05) 1px solid; }
+
+    /* RUNTIME FOOTER */
+    footer {
+      width: 100%; display: flex; justify-content: space-between; align-items: center; font-family: var(--font-code); font-size: 0.65rem; color: var(--text-muted); background: rgba(10, 11, 18, 0.6); padding: 0.5rem 1.5rem; border-radius: 10px; border: var(--glass-border);
+    }
+    .system-status { display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 6px; height: 6px; background: #00ff66; border-radius: 50%; box-shadow: 0 0 8px #00ff66; }
+  </style>
+</head>
+<body>
+
+  <!-- 3D Scene Target Canvas Layer -->
+  <div id="canvas-container"></div>
+
+  <!-- HUD Control Layout Layer -->
+  <div class="app-hud">
+    
+    <!-- Top Row Header Control & Navigation Link Systems -->
+    <header class="interactive-element">
+      <div class="branding">
+        <h1>Maddi Venkata Teja</h1>
+        <span>FULL-STACK AI MATRIX ENVIRONMENT v4.0</span>
+      </div>
+      <nav>
+        <button class="nav-btn active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Home</button>
+        <button class="nav-btn" onclick="switchTab('tech')"><i class="fa-solid fa-layer-group"></i> Tech Stack</button>
+        <button class="nav-btn" onclick="switchTab('experience')"><i class="fa-solid fa-briefcase"></i> Experience</button>
+        <button class="nav-btn" onclick="switchTab('projects-certs')"><i class="fa-solid fa-cubes"></i> Achievements & Projects</button>
+        <button class="nav-btn" onclick="switchTab('contact')"><i class="fa-solid fa-satellite-dish"></i> Contact</button>
+      </nav>
+    </header>
+
+    <!-- Mid Row Workspace Section Configurations -->
+    <div class="main-workspace">
+      
+      <!-- LAYER 1: HOME PAGE -->
+      <div class="view-panel active interactive-element" id="panel-home">
+        <div class="full-center-card">
+          
+          <!-- BIOMETRIC PROFILE SLOT -->
+          
+<div class="profile-avatar-container">
+  <img src="assets/profile.jpg" alt="Maddi Venkata Teja" style="width: 100%; height: 100%; object-fit: cover;">
+</div>
+
+          <h2 class="hero-title">MADDI VENKATA TEJA</h2>
+          <div class="hero-subtitle">AIML Developer | CSE(AIML)@ANITS(2023-27)</div>
+          <p class="hero-desc">Welcome to an immersive technical control station housing next-generation algorithmic deployments, AI agent execution layers, and authenticated developer credential streams.</p>
+          
+          <!-- PROFESSIONAL PROFILE PIPELINES -->
+          <div class="network-container">
+            <a href="https://github.com/maddi-venkata-teja" target="_blank" class="network-chip git-chip">
+              <i class="fa-brands fa-github"></i> GitHub
+            </a>
+            <a href="https://leetcode.com/u/Bw95dWEe9p/" target="_blank" class="network-chip leet-chip">
+              <i class="fa-code"></i> LeetCode
+            </a>
+            <a href="https://www.linkedin.com/in/maddi-venkatateja-143425348/" target="_blank" class="network-chip link-chip">
+              <i class="fa-brands fa-linkedin"></i> LinkedIn
+            </a>
+          </div>
+
+          <!-- DOUBLE ACTION COMPONENT LAYOUT -->
+          <div class="home-actions-wrapper">
+            <button class="action-btn primary-btn" onclick="switchTab('projects-certs')"><i class="fa-solid fa-terminal"></i> Enter Matrix</button>
+            <a href="resume.pdf" download="Resume.pdf" class="action-btn resume-btn"><i class="fa-solid fa-file-arrow-down"></i> Get Resume</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- LAYER 2: TECH STACK -->
+      <div class="view-panel interactive-element" id="panel-tech">
+        <div class="full-center-card">
+          <h2 class="hero-title">Technical Orchestration Stack</h2>
+          <div class="hero-subtitle">CORE CAPABILITIES & FRAMEWORKS</div>
+          <div class="grid-stack">
+            <div class="stack-box"><i class="fa-brands fa-java" style="color:#e41f23;"></i> Java / DSA</div>
+            <div class="stack-box"><i class="fa-brands fa-react" style="color:#61dafb;"></i> React.js</div>
+            <div class="stack-box"><i class="fa-brands fa-node-js" style="color:#6cc24a;"></i> Node / Express</div>
+            <div class="stack-box"><i class="fa-solid fa-database" style="color:#47a248;"></i> MongoDB Atlas</div>
+            <div class="stack-box"><i class="fa-solid fa-brain" style="color:#00f2ff;"></i> OpenAI / RAG</div>
+            <div class="stack-box"><i class="fa-solid fa-network-wired" style="color:#ff0055;"></i> Agentic Systems</div>
+            <div class="stack-box"><i class="fa-solid fa-vial" style="color:#ffcc00;"></i> Streamlit / Python</div>
+            <div class="stack-box"><i class="fa-solid fa-terminal" style="color:#fff;"></i> Git / Backend</div>
+            <div class="stack-box"><i class="fa-solid fa-microchip" style="color:#9b51e0;"></i> Vector DBs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAYER 3: SEPARATE STANDALONE EXPERIENCE PANEL (TIMELINE ARCHITECTURE) -->
+      <div class="view-panel interactive-element" id="panel-experience" style="justify-content: center;">
+        <div class="timeline-container">
+          <div class="panel-title" style="color: var(--accent-purple); border-bottom-color: rgba(155, 81, 224, 0.2); margin-bottom: 2rem;">
+            <span><i class="fa-solid fa-briefcase"></i> Engineering Timeline</span>
+            <span style="font-family: var(--font-code); font-size: 0.75rem;">[RUNTIMELOG]</span>
+          </div>
+          <div class="timeline-track"></div>
+          <div id="timeline-wrapper"></div>
+        </div>
+      </div>
+
+      <!-- LAYER 4: PROJECTS & CERTS NODE MATRIX MAP (OPPOSING ENDS UI) -->
+      <div class="view-panel interactive-element" id="panel-projects-certs" style="justify-content: space-between; padding: 0;">
+        
+        <!-- Left Side: Projects Panel -->
+        <div class="side-column" style="border-radius: 0 16px 16px 0; border-left: none;">
+          <div class="panel-title">
+            <span><i class="fa-solid fa-code-branch"></i> Projects Node</span>
+            <span style="font-family: var(--font-code); font-size: 0.75rem;">[06]</span>
+          </div>
+          <div class="node-list" id="project-list"></div>
+        </div>
+
+        <!-- Right Side: Certificates Panel -->
+        <div class="side-column" style="border-radius: 16px 0 0 16px; border-right: none; border-color: rgba(255, 0, 85, 0.25);">
+          <div class="panel-title" style="color: var(--secondary); border-bottom-color: rgba(255, 0, 85, 0.2);">
+            <span><i class="fa-solid fa-id-card"></i> Credentials Node</span>
+            <span style="font-family: var(--font-code); font-size: 0.75rem;">[10]</span>
+          </div>
+          <div class="node-list" id="cert-list"></div>
+        </div>
+      </div>
+
+      <!-- LAYER 5: CONTACT & REVIEW DUAL FORM PORTAL -->
+      <div class="view-panel interactive-element" id="panel-contact">
+        <div class="full-center-card" style="width: 440px; margin-right: 1rem;">
+          <h2 class="hero-title" style="font-size:1.4rem;">Comms Portal</h2>
+          <div class="hero-subtitle">FORMSUBMIT SECURE PIPELINE</div>
+          
+          <form action="https://formsubmit.co/vv5087867@gmail.com" method="POST">
+            <input type="hidden" name="_subject" value="New Portfolio Matrix Submission!">
+            <input type="hidden" name="_template" value="cyberpunk">
+            
+            <div class="form-group">
+              <label>Signal Identity (Name)</label>
+              <input type="text" name="name" class="form-control" placeholder="Identity context" required />
+            </div>
+            <div class="form-group">
+              <label>Routing Node (Email)</label>
+              <input type="email" name="email" class="form-control" placeholder="name@domain.com" required />
+            </div>
+            <div class="form-group">
+              <label>Data Payload (Message)</label>
+              <textarea name="message" class="form-control" rows="2" placeholder="Write pipeline payload string..." required></textarea>
+            </div>
+            <button type="submit" class="action-btn primary-btn" style="width:100%; padding:0.6rem;">Transmit Comms</button>
+          </form>
+        </div>
+
+        <div class="full-center-card" style="width: 400px; margin-left: 1rem;">
+          <h2 class="hero-title" style="font-size:1.4rem;">Submit Review</h2>
+          <div class="hero-subtitle">FEEDBACK & BENCHMARKS</div>
+          
+          <form action="https://formsubmit.co/vv5087867@gmail.com" method="POST">
+            <input type="hidden" name="_subject" value="New Portfolio User Matrix Review Feedback!">
+            
+            <div class="form-group">
+              <label>Reviewer Metric/Title</label>
+              <input type="text" name="reviewer_title" class="form-control" placeholder="e.g., Lead Engineer / Guest" required>
+            </div>
+            <div class="form-group">
+              <label>Matrix Rating Index</label>
+              <div class="rating-container">
+                <button type="button" class="star-btn" onclick="setRating(1)"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="star-btn" onclick="setRating(2)"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="star-btn" onclick="setRating(3)"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="star-btn" onclick="setRating(4)"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="star-btn" onclick="setRating(5)"><i class="fa-solid fa-star"></i></button>
+              </div>
+              <input type="hidden" name="star_rating_score" id="rating-score-value" value="5">
+            </div>
+            <div class="form-group">
+              <label>Evaluation Notes</label>
+              <textarea name="review_critique" class="form-control" rows="2" placeholder="System performance notes..." required></textarea>
+            </div>
+            <button type="submit" class="action-btn secondary-btn" style="width:100%; padding:0.6rem; border-color:var(--secondary); color:#fff;">Publish Review</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- PERSISTENT TARGET INSPECTING OVERLAY -->
+      <div class="inspect-hub interactive-element" id="inspect-card">
+        <button class="close-btn" id="card-close"><i class="fa-solid fa-xmark"></i></button>
+        <span class="inspect-tag" id="node-tag">NODE SUMMARY</span>
+        <h2 class="inspect-title" id="node-title">Asset Node Name</h2>
+        <p class="inspect-desc" id="node-desc">Loading tracking array structural parameters detail log context details.</p>
+        <div class="action-row" id="node-actions"></div>
+      </div>
+
+    </div>
+
+    <!-- AI MATRIX CHATBOT WIDGET -->
+    <div class="chatbot-trigger interactive-element" onclick="toggleChatbot()">
+      <i class="fa-solid fa-robot"></i>
+    </div>
+    <div class="chatbot-window interactive-element" id="chat-window">
+      <div class="chat-header">
+        <h4><i class="fa-solid fa-brain"></i> MATRIX AI AGENT</h4>
+        <button class="close-btn" style="position:static; font-size:0.9rem;" onclick="toggleChatbot()"><i class="fa-solid fa-minus"></i></button>
+      </div>
+      <div class="chat-body" id="chat-stream">
+        <div class="chat-msg bot">System interface synchronized. Ask me about Venkata Teja's tech stack, certifications, or backend projects!</div>
+      </div>
+      <div class="chat-footer">
+        <input type="text" id="chat-input" class="form-control" style="padding:0.4rem;" placeholder="Type system query..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+        <button class="action-btn primary-btn" style="flex:none; width:40px; padding:0.4rem; border-radius:8px;" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <!-- Bottom Row Footer Telemetry Status Metrics -->
+    <footer class="interactive-element">
+      <div class="system-status">
+        <div class="status-dot"></div>
+        <span>SYSTEM MATRIX: SECURED & OPERATIONAL</span>
+      </div>
+      <div><span>RENDER ENGINE: THREE.JS WEBGL</span></div>
+      <div><span>FORMS: FORMSUBMIT PIPELINE (LIVE)</span></div>
+    </footer>
+
+  </div>
+
+  <script>
+    const projectsData = [
+      { id: 'p1', name: 'META Space', desc: 'Advanced artificial intelligence spatial environment deployment framework instantiated on Hugging Face.', live: 'https://huggingface.co/spaces/venky321/venky-space', git: 'https://github.com/maddi-venkata-teja/Scaler-meta' },
+      { id: 'p2', name: 'AI Study Buddy', desc: 'Context-aware interactive study companion and dynamic intelligence orchestration interface.', live: 'https://maddi-venkata-teja.github.io/AI-Study-Buddy/', git: 'https://github.com/maddi-venkata-teja/AI-Study-Buddy' },
+      { id: 'p3', name: 'CollabSphere', desc: 'Real-time collaborative production workspace utilizing multi-agent ecosystem architecture.', live: 'https://ecs-nine.vercel.app/', git: 'https://github.com/maddi-venkata-teja/ecs' },
+      { id: 'p4', name: 'DSA High Fidelity Engine', desc: 'High-performance interactive algorithmic computation data structure visualization stack.', live: 'https://algoverse-v2.streamlit.app/', git: 'https://github.com/maddi-venkata-teja/llm-v2' },
+      { id: 'p5', name: 'Algoverse Workspace', desc: 'Comprehensive algorithmic simulator internship platform developed under computer engineering guidance.', live: 'https://anits-algoverse.vercel.app/', git: 'https://github.com/maddi-venkata-teja/Algoverse-Chatbot' },
+      { id: 'p6', name: 'SkillGap Architect', desc: 'Predictive capability analysis engine for mapping individual tech credentials directly to engineering positions.', live: 'https://alta-skillgap-architect-rgvhrdmtypna7m4cb2ezjw.streamlit.app/', git: 'https://github.com/maddi-venkata-teja/ALTA-SkillGap-Architect' }
+    ];
+
+    const experienceData = [
+      { id: 'e1', company: 'ANITS CSE(AIML)', role: 'Visual Algorithm Intern', timeline: 'June 2025', details: 'Architected structural visual algorithm layout patterns for interactive student diagnostic workspaces.', url: 'https://drive.google.com/file/d/1YusfwmhxjuQz8Tu_qqKBmWvDekiBFnlg/view?usp=drive_link' },
+      { id: 'e2', company: 'Axcentra (AICTE MSME Registered)', role: 'Python Automation Intern', timeline: 'Jan 2026 - Feb 2026', details: 'Configured robust and resilient automated scripting workflows using advanced modern object environments.', url:'https://drive.google.com/file/d/18yT7ZV2v4JwG0unyeeE6SNI402YqfbkW/view?usp=drive_link' },
+      { id: 'e3', company: 'GirlScript Foundation (GS Labs)', role: 'Generative AI Developer', timeline: 'Active Track', details: 'Contributed directly to live source code pipelines and generative agent execution framework deployments.', url: 'https://drive.google.com/file/d/1byzC1HVCnPZCPySIssp9ERf_Gvnqx1B-/view?usp=drive_link' },
+      { id: 'e4', company: 'IETE Hyderabad', role: 'AIML Intern', timeline: 'May 2025 - June 2025', details: 'Successfully completed an AI & ML Internship at IETE Hyderabad (May–June 2025), covering Python programming, machine learning, deep learning, and Large Language Models (LLMs),Applied industry-oriented AI concepts through hands-on projects, strengthening expertise in modern AI development and intelligent application design.', url: 'https://drive.google.com/file/d/1f59nSmSeUsF4SMqVZHPE1X_Q9KioV7gC/view?usp=drive_link' }
+    ];
+
+    const certificatesData = [
+      { id: 'c1', name: 'Algoverse Internship Certificate', org: 'ANITS Computer Science Dept (AI & ML)', details: 'Validated technical internship program focusing on visual algorithm architecture executed June 2025.', url: 'https://drive.google.com/file/d/1YusfwmhxjuQz8Tu_qqKBmWvDekiBFnlg/view?usp=drive_link' },
+      { id: 'c2', name: 'Quantum Fundamentals Certification', org: 'Amaravati Quantum Valley & WISER', details: 'Rigorous 4-week academic-level foundational exploration into structural quantum physics mechanisms.', url: 'https://drive.google.com/file/d/1lu9X991IZA4xTfFZXNKx5osH6EJVdPSa/view?usp=drive_link' },
+      { id: 'c3', name: 'Alta AI Builders Fellowship', org: 'Alta School of Technology', details: 'Deep architectural development track mastering agentic frameworks, advanced RAG parameters, and API structures.', url: 'https://drive.google.com/file/d/1QJ4CwPyp-PjF_crZOh43pLZFZCG1z-Ms/view?usp=drive_link' },
+      { id: 'c4', name: 'Build with AI Bootcamp Badge', org: 'Google for Developers', details: 'Intense applied engineering workshop sequence covering rapid deployment of transformer frameworks.', url: 'https://drive.google.com/file/d/16WsaWpFuH_VYAPf84b4yHUxYOlsO7lgq/view?usp=drive_link' },
+      { id: 'c5', name: 'Agentic Data Cloud Excellence Award', org: 'Google Developer Groups (Cloud-Kochi)', details: 'Conferred for outstanding benchmark performance during the active Code Vipassana platform season.', url: 'https://drive.google.com/file/d/13fZsmqlwQ8oNvy1IgFh5R002IPOvEcjW/view?usp=drive_link' },
+      { id: 'c6', name: 'Unstop Week-of-Wins Participant', org: 'Unstop Global Network', details: 'Ecosystem development hack track evaluating rapid algorithmic implementation under specific criteria constraints.', url: 'https://drive.google.com/file/d/1RAieaj3yEafBve35jEBI0XYIzn_UcioU/view?usp=drive_link' },
+      { id: 'c7', name: 'Mock Tests & Interviews Launchpad', org: 'Unstop Platform', details: 'Professional engineering readiness evaluation pathway validating alignment with elite technical placement benchmarks.', url: 'https://drive.google.com/file/d/1_mikdQxBbcJMIuxffonA3iQkMCmyTogV/view?usp=drive_link' },
+      { id: 'c8', name: 'Python Badge', org: 'Kaggle', details: 'Completed intensive functional systems engineering program focusing on advanced automation procedures.', url: 'https://drive.google.com/file/d/10y2xuhq4CkD1-j8aeMpXaLOGFOgAe_3g/view?usp=drive_link' },
+      { id: 'c9', name: 'Galatic Problem Solver', org: 'NASA', details: 'Participated in NASA Open Source Hackathon', url: 'https://drive.google.com/file/d/1GS6NLuZqrY-z5JRfMWzrn-h_l8j_48M9/view?usp=drive_link' },
+      { id: 'c10', name: 'ET-AI Hackathon 2026 Semi-Finalist', org: 'The Economic Times Digital', details: 'Recognized for top-tier competitive innovation building enterprise scalable artificial intelligence systems.', url: 'https://drive.google.com/file/d/1tA6_P61qAIdFOetxryH-ODlmRHUoxKs8/view?usp=drive_link' }
+    ];
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view-panel').forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none';
+      });
+
+      const targetedButton = window.event ? window.event.currentTarget : null;
+      if (targetedButton && targetedButton.tagName === 'BUTTON') {
+        targetedButton.classList.add('active');
+        if(tabId === 'experience') targetedButton.classList.add('experience-nav-btn');
+      } else {
+        const buttons = document.querySelectorAll('.nav-btn');
+        if(tabId === 'home') buttons[0].classList.add('active');
+        if(tabId === 'tech') buttons[1].classList.add('active');
+        if(tabId === 'experience') buttons[2].classList.add('active', 'experience-nav-btn');
+        if(tabId === 'projects-certs') buttons[3].classList.add('active');
+        if(tabId === 'contact') buttons[4].classList.add('active');
+      }
+
+      const activePanel = document.getElementById(`panel-${tabId}`);
+      activePanel.style.display = 'flex';
+      setTimeout(() => activePanel.classList.add('active'), 20);
+      document.getElementById('inspect-card').classList.remove('active');
+    }
+
+    function setRating(ratingValue) {
+      document.getElementById('rating-score-value').value = ratingValue;
+      const stars = document.querySelectorAll('.star-btn');
+      stars.forEach((star, index) => {
+        if (index < ratingValue) star.classList.add('selected');
+        else star.classList.remove('selected');
+      });
+    }
+    setRating(5);
+
+    function toggleChatbot() {
+      document.getElementById('chat-window').classList.toggle('active');
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const stream = document.getElementById('chat-stream');
+      const msg = input.value.trim();
+      if(!msg) return;
+
+      const userDiv = document.createElement('div');
+      userDiv.className = 'chat-msg user';
+      userDiv.innerText = msg;
+      stream.appendChild(userDiv);
+      input.value = '';
+      stream.scrollTop = stream.scrollHeight;
+
+      setTimeout(() => {
+        const botDiv = document.createElement('div');
+        botDiv.className = 'chat-msg bot';
+        
+        const lower = msg.toLowerCase();
+        if(lower.includes('project') || lower.includes('work')) {
+          botDiv.innerText = "Teja has deployed 6 cutting-edge platforms including 'META Space' on Hugging Face, 'CollabSphere', and custom interactive DSA visualization frameworks.";
+        } else if(lower.includes('cert') || lower.includes('credential')) {
+          botDiv.innerText = "He holds 10 verified certifications, including Google Cloud Code Vipassana, Alta AI Fellowship, and a computer science ML internship.";
+        } else if(lower.includes('tech') || lower.includes('java')) {
+          botDiv.innerText = "Core technical stack includes advanced Java Data Structures & Algorithms, React.js frontends, and robust backend implementations with MongoDB Atlas and OpenAI.";
+        } else if(lower.includes('experience') || lower.includes('intern')) {
+          botDiv.innerText = "Teja has worked as an engineering intern at ANITS Computer Science Dept, Axcentra, and handles open-source tasks with GirlScript Foundation labs.";
+        } else {
+          botDiv.innerText = "Telemetry understood. Venkata Teja specializes in full-stack engineering and advanced algorithmic implementations. Drop a message via the Comms Portal!";
+        }
+        
+        stream.appendChild(botDiv);
+        stream.scrollTop = stream.scrollHeight;
+      }, 600);
+    }
+
+    const projectList = document.getElementById('project-list');
+    const timelineWrapper = document.getElementById('timeline-wrapper');
+    const certList = document.getElementById('cert-list');
+    const inspectCard = document.getElementById('inspect-card');
+
+    projectsData.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'node-item';
+      div.dataset.id = p.id;
+      div.innerHTML = `<h3>${p.name}</h3><p>${p.desc}</p>`;
+      projectList.appendChild(div);
+      div.addEventListener('click', () => selectNode(p.id, 'project'));
+    });
+
+    experienceData.forEach(e => {
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      item.dataset.id = e.id;
+      item.innerHTML = `
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-time">${e.timeline}</div>
+          <div class="timeline-role">${e.role}</div>
+          <div class="timeline-company">${e.company}</div>
+          <div class="timeline-desc">${e.details}</div>
+        </div>
+      `;
+      timelineWrapper.appendChild(item);
+      item.addEventListener('click', () => selectNode(e.id, 'experience'));
+    });
+
+    certificatesData.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'node-item cert-item';
+      div.dataset.id = c.id;
+      div.innerHTML = `<h3>${c.name}</h3><p>${c.org}</p>`;
+      certList.appendChild(div);
+      div.addEventListener('click', () => selectNode(c.id, 'cert'));
+    });
+
+    let scene, camera, renderer, particleSystem, raycaster, mouse;
+    let nodeMeshes = [];
+    let currentTargetNode = null;
+
+    function init3D() {
+      const container = document.getElementById('canvas-container');
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x030306, 0.015);
+
+      camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 0, 15);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setClearColor(scene.fog.color);
+      container.appendChild(renderer.domElement);
+
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
+      const particleCount = 2000;
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+
+      for (let i = 0; i < particleCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 45;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+        colors[i * 3] = 0.0; colors[i * 3 + 1] = 0.85; colors[i * 3 + 2] = 1.0;
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      particleSystem = new THREE.Points(geometry, new THREE.PointsMaterial({
+        size: 0.18, vertexColors: true, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending
+      }));
+      scene.add(particleSystem);
+
+      // Structure spatial grid matching original architecture dimensions
+      projectsData.forEach((p, idx) => createInteractiveNodeMesh(p.id, -5.5, (idx - 2.5) * 1.8, 0, 0x00f2ff));
+      experienceData.forEach((e, idx) => createInteractiveNodeMesh(e.id, 0, (idx - 1) * 2.5, -1, 0x9b51e0));
+      certificatesData.forEach((c, idx) => createInteractiveNodeMesh(c.id, 5.5, (idx - 4.5) * 1.3, 0, (idx % 2 === 0 ? 0x00f2ff : 0xff0055)));
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+      const dirLight = new THREE.DirectionalLight(0x00f2ff, 0.8);
+      dirLight.position.set(0, 10, 5);
+      scene.add(dirLight);
+
+      window.addEventListener('resize', onWindowResize);
+      container.addEventListener('mousemove', onMouseMove);
+      container.addEventListener('click', onCanvasClick);
+      animate();
+    }
+
+    function createInteractiveNodeMesh(id, x, y, z, colorHex) {
+      const geom = new THREE.BoxGeometry(0.7, 0.7, 0.7);
+      const wireframe = new THREE.LineSegments(new THREE.EdgesGeometry(geom), new THREE.LineBasicMaterial({ color: colorHex, linewidth: 2, transparent: true, opacity: 0.8 }));
+      const hitMesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.0 }));
+      hitMesh.add(wireframe); hitMesh.position.set(x, y, z); hitMesh.userData = { id: id };
+      scene.add(hitMesh); nodeMeshes.push(hitMesh);
+    }
+
+    function selectNode(id, type) {
+      document.querySelectorAll('.node-item, .timeline-item').forEach(el => el.classList.remove('active'));
+      const activeEl = document.querySelector(`[data-id="${id}"]`);
+      if (activeEl) activeEl.classList.add('active');
+
+      const mesh = nodeMeshes.find(m => m.userData.id === id);
+      if (mesh) {
+        currentTargetNode = mesh;
+        gsap.to(mesh.rotation, { x: mesh.rotation.x + Math.PI * 2, y: mesh.rotation.y + Math.PI * 4, duration: 1.2, ease: 'power2.out' });
+        gsap.to(camera.position, { x: mesh.position.x * 0.4, y: mesh.position.y * 0.5, z: 11, duration: 1, ease: 'power3.out' });
+        renderInspectOverlay(id, type);
+      }
+    }
+
+    function renderInspectOverlay(id, type) {
+      const tag = document.getElementById('node-tag');
+      const title = document.getElementById('node-title');
+      const desc = document.getElementById('node-desc');
+      const actions = document.getElementById('node-actions');
+
+      if (type === 'project') {
+        const p = projectsData.find(item => item.id === id);
+        tag.innerText = "VERIFIED PROJECT ARTIFACT"; tag.style.color = "var(--primary)"; tag.style.background = "rgba(0, 242, 255, 0.1)";
+        title.innerText = p.name; desc.innerText = p.desc;
+        actions.innerHTML = `<a href="${p.live}" target="_blank" class="action-btn primary-btn"><i class="fa-solid fa-bolt"></i> Live Demo</a><a href="${p.git}" target="_blank" class="action-btn secondary-btn"><i class="fa-brands fa-github"></i> Repository</a>`;
+      } else if (type === 'experience') {
+        const e = experienceData.find(item => item.id === id);
+        tag.innerText = "VALIDATED WORK EXPERIENCE"; tag.style.color = "var(--accent-purple)"; tag.style.background = "rgba(155, 81, 224, 0.1)";
+        title.innerText = `${e.role} @ ${e.company}`; desc.innerText = `${e.timeline} -- ${e.details}`;
+        actions.innerHTML = `<a href="${e.url}" target="_blank" class="action-btn primary-btn" style="background: linear-gradient(135deg, var(--accent-purple), #7b2cbf); color:#fff;"><i class="fa-solid fa-file-signature"></i> View</a>`;
+      } else {
+        const c = certificatesData.find(item => item.id === id);
+        tag.innerText = "AUTHENTICATED CREDENTIAL"; tag.style.color = "var(--secondary)"; tag.style.background = "rgba(255, 0, 85, 0.1)";
+        title.innerText = c.name; desc.innerText = `${c.org} -- ${c.details}`;
+        actions.innerHTML = `<a href="${c.url}" target="_blank" class="action-btn primary-btn" style="background: linear-gradient(135deg, var(--secondary), #cc0044); color:#fff;"><i class="fa-solid fa-signature"></i> View Certificate</a>`;
+      }
+      inspectCard.classList.add('active');
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      particleSystem.rotation.y += 0.0006;
+      particleSystem.rotation.x += 0.0002;
+      nodeMeshes.forEach(mesh => {
+        if (mesh !== currentTargetNode) { mesh.rotation.x += 0.005; mesh.rotation.y += 0.008; } 
+        else { mesh.rotation.y += 0.015; }
+      });
+      renderer.render(scene, camera);
+    }
+
+    function onMouseMove(e) {
+      const container = document.getElementById('canvas-container');
+      const rect = container.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / container.clientWidth) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / container.clientHeight) * 2 + 1;
+    }
+
+    function onCanvasClick() {
+      const isMatrixActive = document.getElementById('panel-projects-certs').classList.contains('active');
+      const isExperienceActive = document.getElementById('panel-experience').classList.contains('active');
+      
+      if (!isMatrixActive && !isExperienceActive) return;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(nodeMeshes);
+      if (intersects.length > 0) {
+        const id = intersects[0].object.userData.id;
+        let nodeType = 'project';
+        if (id.startsWith('e')) nodeType = 'experience';
+        if (id.startsWith('c')) nodeType = 'cert';
+        
+        if (nodeType === 'experience' && isMatrixActive) switchTab('experience');
+        if ((nodeType === 'project' || nodeType === 'cert') && isExperienceActive) switchTab('projects-certs');
+
+        selectNode(id, nodeType);
+      }
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById('canvas-container');
+      camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    document.getElementById('card-close').addEventListener('click', () => {
+      inspectCard.classList.remove('active');
+      document.querySelectorAll('.node-item, .timeline-item').forEach(el => el.classList.remove('active'));
+      currentTargetNode = null;
+      gsap.to(camera.position, { x: 0, y: 0, z: 15, duration: 1.2, ease: 'power2.out' });
+    });
+
+    window.onload = init3D;
+  </script>
+</body>
+</html>
